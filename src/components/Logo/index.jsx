@@ -1,9 +1,14 @@
 import "./logo.css";
 
-export const Logo = () => {
+export function Logo({ className = "" }) {
   return (
-    <div className="logo">
-      <div className="text-wrapper">Logotipo</div>
-    </div>
+    <img
+      src='#'
+      alt='Logo'
+      width={96}
+      height={96}
+      className={`w-24 h-24 mb-4 ${className}`}
+      draggable={false}
+    />
   );
-};
+}

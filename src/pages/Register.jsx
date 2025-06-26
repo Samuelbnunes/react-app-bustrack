@@ -6,7 +6,7 @@ import { signUp } from "../services/authService";
 export function Register() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    const [senha, setSenha] = useState("");
+    const [password, setPassword] = useState("");
     const [erro, setErro] = useState("");
     const navigate = useNavigate();
 
@@ -14,7 +14,7 @@ export function Register() {
         e.preventDefault();
         setErro("");
         try {
-            await signUp(name, email, senha);
+            await signUp(name, email, password);
             navigate("/login");
         } catch (err) {
             setErro(err.message);
@@ -55,12 +55,12 @@ export function Register() {
                     </div>
                     <div className="pb-4">
                         <Input
-                            label="Senha"
-                            placeholder="Digite sua senha..."
+                            label="password"
+                            placeholder="Digite sua Senha..."
                             type="password"
                             required
-                            value={senha}
-                            onChange={e => setSenha(e.target.value)}
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
                         />
                     </div>
 

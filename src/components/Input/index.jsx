@@ -1,10 +1,19 @@
 import './input.css';
 
-export const Input = ({ label, value, onChange, type = "text", placeholder = "", ...props }) => (
+export const Input = ({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder = "",
+  className = "",
+  labelClassName = "",
+  ...props
+}) => (
   <div>
-    {label && <label>{label}</label>}
+    {label && <label className={labelClassName}>{label}</label>}
     <input
-      className="input"
+      className={`input ${className}`}
       type={type}
       value={value}
       onChange={onChange}

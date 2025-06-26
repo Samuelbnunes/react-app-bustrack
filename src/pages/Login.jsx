@@ -6,7 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 export function Login() {
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [password, setPassword] = useState("");
   const [erro, setErro] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -15,7 +15,8 @@ export function Login() {
     e.preventDefault();
     setErro("");
     try {
-      const token = await signIn(email, senha);
+      const token = await signIn(email, password);
+      sessionStorage.setItem('token', token);
       login(token);
       navigate("/map");
     } catch (err) {
@@ -24,18 +25,12 @@ export function Login() {
   };
 
   return (
-    <>
-      <div className="max-w-md mx-auto p-4">
-        <div className="text-center">
-          <Logo />
-        </div>
-
-        <div className="pt-6 pb-4">
-          <Title title="Faça seu cadastro" />
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="pb-4">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-900">
+      <div className="bg-zinc-800 rounded-2xl shadow-lg p-8 w-full max-w-md flex flex-col items-center">
+        <Logo className="mb-4" />
+        <h1 className="text-4xl font-bold text-white font-serif mb-1">Bustrack</h1>
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="mb-4">
             <Input
               label="Email"
               placeholder="Digite seu email..."
@@ -43,34 +38,37 @@ export function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="rounded-xl bg-zinc-700 text-white border-none focus:ring-2 focus:ring-zinc-500"
+              labelClassName="text-zinc-300"
             />
           </div>
-          <div className="pb-4">
+          <div className="mb-4">
             <Input
               label="Senha"
               placeholder="Digite sua senha..."
               type="password"
               required
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="rounded-xl bg-zinc-700 text-white border-none focus:ring-2 focus:ring-zinc-500"
+              labelClassName="text-zinc-300"
             />
           </div>
-          {erro && <p style={{ color: "red" }}>{erro}</p>}
-
-          <div className="text-center pt-4">
-            <Button type="submit">Acessar</Button>
-          </div>
-        </form>
-
-        <div className="text-center pt-8">
-          <Link
-            to="/register"
-            className="text-blue-600 hover:underline"
+          {erro && <p className="text-red-400 text-sm mb-2">{erro}</p>}
+          <Button
+            type="submit"
+            className="w-full py-3 rounded-xl bg-white text-zinc-900 font-semibold text-lg hover:bg-zinc-200 transition mb-2"
           >
-            Faça seu cadastro
-          </Link>
-        </div>
+            Entrar
+          </Button>
+        </form>
+        <Link
+          to="/register"
+          className="text-zinc-400 hover:underline text-sm mt-4"
+        >
+          Criar conta
+        </Link>
       </div>
-    </>
+    </div>
   );
 }
