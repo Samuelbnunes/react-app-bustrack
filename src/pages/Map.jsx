@@ -3,7 +3,6 @@ import { Navbar } from "../components";
 import { GoogleMap, Marker, useJsApiLoader, InfoWindow } from "@react-google-maps/api";
 import { getPoints, postPoint, deletePoint } from '../services/mapService';
 import { useAuth } from "../contexts/AuthContext";
-import sushiImg from "../assets/sushi-passo-fundo.png";
 
 const containerStyle = {
   width: "100%",
@@ -15,7 +14,8 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
   const [markers, setMarkers] = useState([]);
   const [showInput, setShowInput] = useState(false);
   const [newPoint, setNewPoint] = useState(null);
-  const [description, setDescription] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [nome, setNome] = useState(""); // Novo estado para o nome do ponto
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [open, setOpen] = useState(false);
@@ -43,23 +43,27 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
       longitude: event.latLng.lng(),
     });
     setShowInput(true);
-    setDescription("");
+    setDescricao("");
+    setNome(""); // Limpa o nome ao abrir o input
     setIsEditing(false);
     setSelectedMarker(null);
   };
 
   // Confirma o cadastro do ponto
   const handleAddPoint = async () => {
-    if (!description.trim()) return;
+    if (!descricao.trim() || !nome.trim()) return;
     const pointData = {
-      ...newPoint,
-      description,
+      name: nome,
+      description: descricao,
+      latitude: newPoint.latitude,
+      longitude: newPoint.longitude,
     };
     try {
       const savedPoint = await postPoint(token, pointData);
       const savedMarker = {
         id: savedPoint.id,
-        title: savedPoint.description || "Novo Ponto",
+        title: savedPoint.name || "Novo Ponto",
+        description: savedPoint.description,
         position: {
           lat: savedPoint.latitude,
           lng: savedPoint.longitude,
@@ -67,7 +71,8 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
       };
       setMarkers((prev) => [...prev, savedMarker]);
       setShowInput(false);
-      setDescription("");
+      setDescricao("");
+      setNome("");
       setNewPoint(null);
     } catch (error) {
       alert(error.message);
@@ -83,7 +88,8 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
 
   // Inicia edição da descrição
   const handleEditDescription = () => {
-    setDescription(selectedMarker.title);
+    setDescricao(selectedMarker.description || selectedMarker.title);
+    setNome(selectedMarker.title || "");
     setIsEditing(true);
     setShowInput(true);
     setNewPoint({
@@ -95,26 +101,27 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
 
   // Salva edição da descrição
   const handleSaveEdit = async () => {
-    if (!description.trim()) return;
+    if (!descricao.trim() || !nome.trim()) return;
     // Atualiza no backend (reutilizando postPoint, mas ideal seria um put/patch)
     const pointData = {
+      id: newPoint.id,
+      name: nome,
+      description: descricao,
       latitude: newPoint.latitude,
       longitude: newPoint.longitude,
-      description,
-      id: newPoint.id,
     };
     try {
-      // Aqui seria ideal um endpoint de update, mas vamos simular:
       await postPoint(token, pointData); // Troque por updatePoint se existir
       setMarkers((prev) =>
         prev.map((m) =>
-          m.id === newPoint.id ? { ...m, title: description } : m
+          m.id === newPoint.id ? { ...m, title: nome, description: descricao } : m
         )
       );
       setShowInput(false);
       setIsEditing(false);
-      setSelectedMarker((prev) => prev && { ...prev, title: description });
-      setDescription("");
+      setSelectedMarker((prev) => prev && { ...prev, title: nome, description: descricao });
+      setDescricao("");
+      setNome("");
       setNewPoint(null);
     } catch (error) {
       alert(error.message);
@@ -138,7 +145,8 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
   const handleCancel = () => {
     setShowInput(false);
     setIsEditing(false);
-    setDescription("");
+    setDescricao("");
+    setNome("");
     setNewPoint(null);
   };
 
@@ -167,8 +175,10 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
                 onCloseClick={() => setSelectedMarker(null)}
               >
                 <div style={{ minWidth: 200 }}>
+                  <div style={{ fontWeight: "bold", marginBottom: 8 }}>Nome:</div>
+                  <div style={{ marginBottom: 8 }}>{selectedMarker.title}</div>
                   <div style={{ fontWeight: "bold", marginBottom: 8 }}>Descrição:</div>
-                  <div style={{ marginBottom: 12 }}>{selectedMarker.title}</div>
+                  <div style={{ marginBottom: 12 }}>{selectedMarker.description}</div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button
                       onClick={handleEditDescription}
@@ -181,7 +191,7 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
                         cursor: "pointer"
                       }}
                     >
-                      Editar descrição
+                      Editar ponto
                     </button>
                     <button
                       onClick={handleDeletePoint}
@@ -205,7 +215,7 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
           <div>Carregando mapa...</div>
         )}
 
-        {/* Input para descrição do ponto */}
+        {/* Input para nome e descrição do ponto */}
         {showInput && (
           <div style={{
             position: "absolute",
@@ -224,12 +234,29 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
             alignItems: "center"
           }}>
             <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 16 }}>
-              {isEditing ? "Editar descrição do ponto" : "Adicionar novo ponto"}
+              {isEditing ? "Editar ponto" : "Adicionar novo ponto"}
             </div>
             <input
               type="text"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
+              value={nome}
+              onChange={e => setNome(e.target.value)}
+              placeholder="Digite o nome"
+              style={{
+                width: "100%",
+                padding: 10,
+                borderRadius: 6,
+                border: "1px solid #444",
+                marginBottom: 16,
+                background: "#181a20",
+                color: "#fff",
+                fontSize: 16
+              }}
+              autoFocus
+            />
+            <input
+              type="text"
+              value={descricao}
+              onChange={e => setDescricao(e.target.value)}
               placeholder="Digite a descrição"
               style={{
                 width: "100%",
@@ -241,7 +268,6 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
                 color: "#fff",
                 fontSize: 16
               }}
-              autoFocus
             />
             <div style={{ display: "flex", gap: 16, width: "100%", justifyContent: "center" }}>
               <button
@@ -277,113 +303,6 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
             </div>
           </div>
         )}
-
-        {/* Sugestão de ponto - Sushi Passo Fundo */}
-        <div style={{ padding: "32px 0" }}>
-          <h2 style={{ color: "#fff", marginLeft: 48 }}>Popular nas proximidades</h2>
-          {/* Card Sushi Passo Fundo */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              background: "#28282d",
-              borderRadius: 20,
-              padding: 20,
-              margin: "24px 48px",
-              cursor: "pointer",
-              maxWidth: 500,
-              justifyContent: "space-between",
-              boxShadow: "0 2px 8px #0002"
-            }}
-            onClick={() => setOpen(true)}
-          >
-            <div>
-              <div style={{ fontWeight: "bold", fontSize: 22 }}>Sushi Passo Fundo</div>
-              <div style={{ color: "#bbb", margin: "4px 0" }}>Japonês • 4.6 ★ • 0.7 mi</div>
-            </div>
-            <img
-              src={sushiImg}
-              alt="Sushi Passo Fundo"
-              style={{
-                width: 70,
-                height: 70,
-                objectFit: "cover",
-                borderRadius: 12,
-                marginLeft: 16,
-                background: "#111",
-                boxShadow: "0 2px 8px #0004"
-              }}
-            />
-          </div>
-
-          {/* Modal com perfil do Sushi Passo Fundo */}
-          {open && (
-            <div
-              style={{
-                position: "fixed",
-                top: 0, left: 0, right: 0, bottom: 0,
-                background: "rgba(0,0,0,0.7)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1000
-              }}
-              onClick={() => setOpen(false)}
-            >
-              <div
-                style={{
-                  background: "#23272f",
-                  borderRadius: 20,
-                  padding: 32,
-                  minWidth: 340,
-                  maxWidth: 400,
-                  color: "#fff",
-                  position: "relative",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.4)"
-                }}
-                onClick={e => e.stopPropagation()}
-              >
-                <button
-                  onClick={() => setOpen(false)}
-                  style={{
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                    background: "none",
-                    border: "none",
-                    color: "#fff",
-                    fontSize: 22,
-                    cursor: "pointer"
-                  }}
-                  aria-label="Fechar"
-                >×</button>
-                <img
-                  src={sushiImg}
-                  alt="Sushi Passo Fundo"
-                  style={{
-                    width: "100%",
-                    height: 160,
-                    objectFit: "cover",
-                    borderRadius: 12,
-                    marginBottom: 16,
-                    background: "#111"
-                  }}
-                />
-                <div style={{ fontWeight: "bold", fontSize: 24, marginBottom: 4 }}>Sushi Passo Fundo</div>
-                <div style={{ color: "#ffd700", fontSize: 18, marginBottom: 8 }}>4.6 ★</div>
-                <div style={{ color: "#bbb", marginBottom: 16 }}>
-                  O melhor sushi de Passo Fundo! Ambiente aconchegante, ingredientes frescos e uma experiência japonesa autêntica.
-                </div>
-                <div style={{ fontWeight: "bold", marginBottom: 8 }}>Combos:</div>
-                <ul style={{ paddingLeft: 20, marginBottom: 0 }}>
-                  <li>Combo 1: 20 peças variadas - R$ 39,90</li>
-                  <li>Combo 2: 40 peças especiais - R$ 69,90</li>
-                  <li>Combo 3: 60 peças premium - R$ 99,90</li>
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </>
   );

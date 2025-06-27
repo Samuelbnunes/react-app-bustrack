@@ -5,6 +5,7 @@ const API_URL = 'https://api-java-springboot-b0g2.onrender.com/auth';
 export async function signIn(email, password) {
   try {
     const response = await axios.post(`${API_URL}/signin`, { email, password });
+    
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -12,10 +13,10 @@ export async function signIn(email, password) {
         throw new Error('Requisição inválida.');
       }
       if (error.response.status === 401) {
-        throw new Error('Usuário ou senha incorretos.');
+        throw new Error('Usuário ou senha incorretos.'+ error);
       }
     }
-    throw new Error('Erro ao autenticar.');
+    throw new Error('Erro ao error.'+error);
   }
 }
 

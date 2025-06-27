@@ -6,7 +6,7 @@ export function Navbar() {
 
     return (
         <header className="navbar">
-            <div>BusTrack</div>
+            <div>MAPA DE PASSO FUNDO</div>
             <button className="close" onClick={logout}>X</button>
         </header>
     );
