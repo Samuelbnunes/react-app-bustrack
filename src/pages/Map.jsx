@@ -3,6 +3,8 @@ import { Navbar } from "../components";
 import { GoogleMap, Marker, useJsApiLoader, InfoWindow } from "@react-google-maps/api";
 import { getPoints, postPoint, deletePoint } from '../services/mapService';
 import { useAuth } from "../contexts/AuthContext";
+import { FaRegBookmark, FaSignOutAlt } from "react-icons/fa"; // Adicione no topo
+import { useNavigate } from "react-router-dom"; // Adicione esta linha
 
 const containerStyle = {
   width: "100%",
@@ -10,7 +12,8 @@ const containerStyle = {
 };
 
 export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) => {
-  const { token } = useAuth();
+  const { token, logout } = useAuth(); // Adicione logout do contexto
+  const navigate = useNavigate(); // Para redirecionar após logout
   const [markers, setMarkers] = useState([]);
   const [showInput, setShowInput] = useState(false);
   const [newPoint, setNewPoint] = useState(null);
@@ -160,6 +163,11 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
             center={center}
             zoom={zoom}
             onClick={handleMapClick}
+            options={{
+              disableDefaultUI: true,
+              clickableIcons: false,
+              keyboardShortcuts: false,
+            }}
           >
             {markers.map(marker => (
               <Marker
@@ -214,6 +222,26 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
         ) : (
           <div>Carregando mapa...</div>
         )}
+
+        {/* Menu flutuante inferior */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-3xl shadow-lg flex gap-6 px-8 py-2 items-center z-10 min-w-[220px]">
+          <button
+            className="flex flex-col items-center bg-transparent border-none outline-none cursor-pointer text-[#1e7570] font-medium text-[15px] min-w-[80px]"
+          >
+            <FaRegBookmark size={24} className="mb-0.5" />
+            Favoritos
+          </button>
+          <button
+            className="flex flex-col items-center bg-transparent border-none outline-none cursor-pointer text-[#1e7570] font-medium text-[15px] min-w-[80px]"
+            onClick={() => {
+              logout();
+              navigate("/login");
+            }}
+          >
+            <FaSignOutAlt size={24} className="mb-0.5" />
+            Sair
+          </button>
+        </div>
 
         {/* Input para nome e descrição do ponto */}
         {showInput && (
