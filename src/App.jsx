@@ -4,7 +4,7 @@ import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Map } from "./pages/Map";
 import { PrivateRoute } from "./components/PrivateRoute";
-import { SplashScreen } from "./components/SplashScreen";
+import { SplashScreen } from "./pages/SplashScreen";
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);

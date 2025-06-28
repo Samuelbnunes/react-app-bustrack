@@ -40,7 +40,7 @@ try {
       <div className="flex flex-col items-center w-full max-w-[340px] mx-auto h-full">
         <img
           src={logoMinVerde}
-          alt="BusTrack Logo Minimalista Verde"
+          alt="BusTrack logo linimalista verde"
           className="w-[180px] h-[60px] mx-auto mt-[5.3rem] mb-10"
         />
         <form
@@ -61,7 +61,7 @@ try {
             <div className="relative w-full">
               <input
                 className="w-full rounded-2xl px-6 py-4 pr-12 bg-[#eaf3ff] text-black placeholder:text-[#8CA6A6] text-base font-medium shadow focus:outline-none"
-                placeholder="Insira Sua senha:"
+                placeholder="Insira sua senha:"
                 type={showPassword ? "text" : "password"}
                 required
                 value={password}
@@ -79,7 +79,7 @@ try {
             </div>
             <div className="flex flex-col gap-2">
               <label className="flex items-center text-[#184C4C] text-base font-medium">
-                Salvar password
+                Salvar senha
                 <input
                   type="checkbox"
                   className="ml-2 w-5 h-5 accent-[#10A39E] rounded"

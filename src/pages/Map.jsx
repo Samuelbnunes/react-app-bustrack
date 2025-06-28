@@ -15,13 +15,13 @@ export const Map = ({ center = { lat: -28.2628, lng: -52.4067 }, zoom = 13 }) =>
   const [showInput, setShowInput] = useState(false);
   const [newPoint, setNewPoint] = useState(null);
   const [descricao, setDescricao] = useState("");
-  const [nome, setNome] = useState(""); // Novo estado para o nome do ponto
+  const [nome, setNome] = useState("");
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [open, setOpen] = useState(false);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: import.meta.env.VITE_KEY_MAPS
   });
 
   useEffect(() => {
